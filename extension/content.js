@@ -18,7 +18,7 @@ function createChatbotContainer() {
     </div>
     <div id="chatbot-body" class="w-72 py-1 px-1 bg-white dark:bg-gray-800 rounded-b-xl shadow-xl border dark:border-gray-700">
       <div id="chat-history" class="pb-1 overflow-y-auto text-gray-800 dark:text-white text-sm"></div>
-      <div class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg border dark:border-gray-700 flex items-center">
+      <div id="input-container" class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg border dark:border-gray-700 flex items-center">
         <input type="text" id="user-input" class="flex-grow bg-transparent text-gray-800 dark:text-white placeholder-gray-500 focus:outline-none text-sm" placeholder="Ask a question" autocomplete="off">
         <button id="send-button" class="ml-2 px-2 py-1 rounded text-gray-500 hover:text-gray-400 focus:outline-none">
           <svg width="18" height="18" viewBox="0 -0.5 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,6 +32,13 @@ function createChatbotContainer() {
 
   // z-index
   chatbotContainer.style.zIndex = '9999';
+
+  // Fix pointer events
+  chatbotContainer.style.pointerEvents = 'none';
+  const chatbotHeader = chatbotContainer.querySelector('#chatbot-header');
+  const inputContainer = chatbotContainer.querySelector('#input-container');
+  chatbotHeader.style.pointerEvents = 'auto';
+  inputContainer.style.pointerEvents = 'auto';
 
   // Inject
   document.body.appendChild(chatbotContainer);
@@ -54,7 +61,6 @@ function createChatbotContainer() {
   chatbotState = true;
 
   // Initialise drag and drop
-  const chatbotHeader = document.getElementById('chatbot-header');
   chatbotHeader.addEventListener('mousedown', handleMouseDown);
   document.addEventListener('mousemove', handleMouseMove);
   document.addEventListener('mouseup', handleMouseUp);
