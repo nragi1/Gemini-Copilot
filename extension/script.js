@@ -80,9 +80,4 @@ function startChat() {
   });
 }
 
-// Close the chatbot
-document.getElementById('close-button').addEventListener('click', function() {
-  document.getElementById('chatbot-container').style.display = 'none';
-});
-
 startChat();

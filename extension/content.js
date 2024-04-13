@@ -1,8 +1,9 @@
 let chatbotContainer = null;
 let isInjected = false;
+let chatbotState = false;
 
 function createChatbotContainer() {
-  if (chatbotContainer) return;
+  if (chatbotState) return;
   chatbotContainer = document.createElement('div');
   chatbotContainer.id = 'chatbot-container';
   chatbotContainer.classList.add('fixed', 'bottom-4', 'right-4');
@@ -50,10 +51,20 @@ function createChatbotContainer() {
   styleElement.href = chrome.runtime.getURL('styles.css');
   document.head.appendChild(styleElement);
 
+  chatbotState = true;
+
+  // Initialise drag and drop
   const chatbotHeader = document.getElementById('chatbot-header');
   chatbotHeader.addEventListener('mousedown', handleMouseDown);
   document.addEventListener('mousemove', handleMouseMove);
   document.addEventListener('mouseup', handleMouseUp);
+
+  // Close through close button
+  document.getElementById('close-button').addEventListener('click', function() {
+    removeChatbotContainer();
+  });
+
+  startChat();
 } 
 
 // Remove the chatbot container
@@ -65,9 +76,11 @@ function removeChatbotContainer() {
     document.removeEventListener('mouseup', handleMouseUp);
     chatbotContainer.remove();
     chatbotContainer = null;
+    chatbotState = false;
   }
 }
 
+// Dragging the chatbot container
 let isDragging = false;
 let offsetX = 0;
 let offsetY = 0;
