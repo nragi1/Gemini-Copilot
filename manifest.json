@@ -1,0 +1,12 @@
+{
+  "manifest_version": 2,
+  "name": "Gemini Test",
+  "version": "1.0",
+  "description": "Test extension for gemini",
+  "permissions": [
+    "storage"
+  ],
+  "browser_action": {
+    "default_popup": "popup.html"
+  }
+}
