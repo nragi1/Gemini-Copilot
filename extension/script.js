@@ -57,18 +57,25 @@ async function sendMessage(message) {
 function startChat() {
   const userInput = document.getElementById('user-input');
   const sendButton = document.getElementById('send-button');
+  let isSending = false;
 
   sendButton.addEventListener('click', async () => {
-    const message = userInput.value;
-    userInput.value = '';
-    await sendMessage(message);
-  });
-
-  userInput.addEventListener('keypress', async (event) => {
-    if (event.key === 'Enter') {
+    if (!isSending) {
+      isSending = true;
       const message = userInput.value;
       userInput.value = '';
       await sendMessage(message);
+      isSending = false;
+    }
+  });
+
+  userInput.addEventListener('keypress', async (event) => {
+    if (event.key === 'Enter' && !isSending) {
+      isSending = true;
+      const message = userInput.value;
+      userInput.value = '';
+      await sendMessage(message);
+      isSending = false;
     }
   });
 }
@@ -79,50 +86,48 @@ document.getElementById('close-button').addEventListener('click', function() {
 });
 
 // Dragging the Copilot
-document.addEventListener('DOMContentLoaded', function() {
-  const chatbotContainer = document.getElementById('chatbot-container');
-  const chatbotHeader = document.getElementById('chatbot-header');
+const chatbotContainer = document.getElementById('chatbot-container');
+const chatbotHeader = document.getElementById('chatbot-header');
+let isDragging = false;
+let offsetX = 0;
+let offsetY = 0;
 
-  let isDragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
-
-  chatbotHeader.addEventListener('mousedown', function(event) {
-    isDragging = true;
-    offsetX = event.clientX - chatbotContainer.offsetLeft;
-    offsetY = event.clientY - chatbotContainer.offsetTop;
-  });
-
-  document.addEventListener('mousemove', function(event) {
-    if (!isDragging) return;
-
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-    const chatbotWidth = chatbotContainer.offsetWidth;
-    const chatbotHeight = chatbotContainer.offsetHeight;
-
-    let left = event.clientX - offsetX;
-    let top = event.clientY - offsetY;
-
-    // Restrict
-    if (left < 0) {
-      left = 0;
-    } else if (left + chatbotWidth > windowWidth) {
-      left = windowWidth - chatbotWidth;
-    }
-    
-    if (top < 0) {
-      top = 0;
-    } else if (top + chatbotHeight > windowHeight) {
-      top = windowHeight - chatbotHeight;
-    }
-    
-    chatbotContainer.style.left = left + 'px';
-    chatbotContainer.style.top = top + 'px';
-  });
-
-  document.addEventListener('mouseup', function() {
-    isDragging = false;
-  });
+chatbotHeader.addEventListener('mousedown', function(event) {
+  isDragging = true;
+  offsetX = event.clientX - chatbotContainer.offsetLeft;
+  offsetY = event.clientY - chatbotContainer.offsetTop;
 });
+
+document.addEventListener('mousemove', function(event) {
+  if (!isDragging) return;
+
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  const chatbotWidth = chatbotContainer.offsetWidth;
+  const chatbotHeight = chatbotContainer.offsetHeight;
+
+  let left = event.clientX - offsetX;
+  let top = event.clientY - offsetY;
+
+  // Restrict movement within the window
+  if (left < 0) {
+    left = 0;
+  } else if (left + chatbotWidth > windowWidth) {
+    left = windowWidth - chatbotWidth;
+  }
+
+  if (top < 0) {
+    top = 0;
+  } else if (top + chatbotHeight > windowHeight) {
+    top = windowHeight - chatbotHeight;
+  }
+
+  chatbotContainer.style.left = left + 'px';
+  chatbotContainer.style.top = top + 'px';
+});
+
+document.addEventListener('mouseup', function() {
+  isDragging = false;
+});
+
 startChat();

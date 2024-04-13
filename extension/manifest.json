@@ -1,12 +1,31 @@
 {
-  "manifest_version": 2,
-  "name": "Gemini Test",
+  "manifest_version": 3,
+  "name": "My Chatbot Extension",
   "version": "1.0",
-  "description": "Test extension for gemini",
+  "description": "A chatbot extension",
   "permissions": [
-    "storage"
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting"
   ],
-  "browser_action": {
-    "default_popup": "popup.html"
-  }
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": "icon.png",
+    "default_title": "Toggle Chatbot"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["script.js", "styles.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
