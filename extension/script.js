@@ -47,8 +47,8 @@ async function sendMessage(message) {
   // Remove the loading message
   chatHistory.removeChild(loadingMessage);
 
-  // Display the conversation history in the chat interface change later
-  chatHistory.innerHTML = recenthistory.map(entry => `<p><strong>${entry.author}:</strong> ${entry.content}</p>`).join('');
+  // Display the conversation history in the chat interface
+  chatHistory.innerHTML = convHistory.map(entry => `<p><strong>${entry.author}:</strong> ${entry.content}</p>`).join('');
 
   // Enable the send button
   sendButton.disabled = false;
@@ -83,51 +83,6 @@ function startChat() {
 // Close the chatbot
 document.getElementById('close-button').addEventListener('click', function() {
   document.getElementById('chatbot-container').style.display = 'none';
-});
-
-// Dragging the Copilot
-const chatbotContainer = document.getElementById('chatbot-container');
-const chatbotHeader = document.getElementById('chatbot-header');
-let isDragging = false;
-let offsetX = 0;
-let offsetY = 0;
-
-chatbotHeader.addEventListener('mousedown', function(event) {
-  isDragging = true;
-  offsetX = event.clientX - chatbotContainer.offsetLeft;
-  offsetY = event.clientY - chatbotContainer.offsetTop;
-});
-
-document.addEventListener('mousemove', function(event) {
-  if (!isDragging) return;
-
-  const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
-  const chatbotWidth = chatbotContainer.offsetWidth;
-  const chatbotHeight = chatbotContainer.offsetHeight;
-
-  let left = event.clientX - offsetX;
-  let top = event.clientY - offsetY;
-
-  // Restrict movement within the window
-  if (left < 0) {
-    left = 0;
-  } else if (left + chatbotWidth > windowWidth) {
-    left = windowWidth - chatbotWidth;
-  }
-
-  if (top < 0) {
-    top = 0;
-  } else if (top + chatbotHeight > windowHeight) {
-    top = windowHeight - chatbotHeight;
-  }
-
-  chatbotContainer.style.left = left + 'px';
-  chatbotContainer.style.top = top + 'px';
-});
-
-document.addEventListener('mouseup', function() {
-  isDragging = false;
 });
 
 startChat();

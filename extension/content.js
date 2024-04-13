@@ -42,13 +42,64 @@ function createChatbotContainer() {
   styleElement.type = 'text/css';
   styleElement.href = chrome.runtime.getURL('styles.css');
   document.head.appendChild(styleElement);
+
+  const chatbotHeader = document.getElementById('chatbot-header');
+  chatbotHeader.addEventListener('mousedown', handleMouseDown);
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
 } 
+
 // Remove the chatbot container
 function removeChatbotContainer() {
   if (chatbotContainer) {
+    const chatbotHeader = document.getElementById('chatbot-header');
+    chatbotHeader.removeEventListener('mousedown', handleMouseDown);
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
     chatbotContainer.remove();
     chatbotContainer = null;
   }
+}
+
+let isDragging = false;
+let offsetX = 0;
+let offsetY = 0;
+
+function handleMouseDown(event) {
+  isDragging = true;
+  offsetX = event.clientX - chatbotContainer.offsetLeft;
+  offsetY = event.clientY - chatbotContainer.offsetTop;
+}
+
+function handleMouseMove(event) {
+  if (!isDragging) return;
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  const chatbotWidth = chatbotContainer.offsetWidth;
+  const chatbotHeight = chatbotContainer.offsetHeight;
+
+  let left = event.clientX - offsetX;
+  let top = event.clientY - offsetY;
+
+  // Restrict movement within the window
+  if (left < 0) {
+    left = 0;
+  } else if (left + chatbotWidth > windowWidth) {
+    left = windowWidth - chatbotWidth;
+  }
+
+  if (top < 0) {
+    top = 0;
+  } else if (top + chatbotHeight > windowHeight) {
+    top = windowHeight - chatbotHeight;
+  }
+
+  chatbotContainer.style.left = left + 'px';
+  chatbotContainer.style.top = top + 'px';
+}
+
+function handleMouseUp() {
+  isDragging = false;
 }
 
 // Toggle the chatbot container
