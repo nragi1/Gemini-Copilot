@@ -32,7 +32,7 @@ async function sendMessage(message) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ message: message, history: conversationHistory }),
+    body: JSON.stringify({ message: message, history: convHistory }),
   });
 
   const data = await response.json();

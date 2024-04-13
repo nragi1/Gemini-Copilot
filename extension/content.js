@@ -1,7 +1,8 @@
-// Create the chatbot container
 let chatbotContainer = null;
+let isInjected = false;
 
 function createChatbotContainer() {
+  if (chatbotContainer) return;
   chatbotContainer = document.createElement('div');
   chatbotContainer.id = 'chatbot-container';
   chatbotContainer.classList.add('fixed', 'bottom-4', 'right-4');
@@ -28,13 +29,19 @@ function createChatbotContainer() {
     </div>
   `;
 
+  // z-index
+  chatbotContainer.style.zIndex = '9999';
+
   // Inject
   document.body.appendChild(chatbotContainer);
 
   // Load the script.js file
-  const scriptElement = document.createElement('script');
-  scriptElement.src = chrome.runtime.getURL('script.js');
-  document.body.appendChild(scriptElement);
+  if (!isInjected) {
+    const scriptElement = document.createElement('script');
+    scriptElement.src = chrome.runtime.getURL('script.js');
+    document.body.appendChild(scriptElement);
+    isInjected = true;
+  }
 
   // Load the styles.css file
   const styleElement = document.createElement('link');
