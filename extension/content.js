@@ -66,8 +66,6 @@ function createChatbotContainer() {
   document.getElementById('close-button').addEventListener('click', function() {
     toggleChatbotVisibility();
   });
-
-  isChatbotVisible = true;
 } 
 
 function toggleChatbotVisibility() {
@@ -133,7 +131,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'toggleChatbot') {
     toggleChatbotVisibility();
   } else if (request.action === 'explainText') {
-    explainText(request.text);
+    if (!LoadingExplain) {
+      explainText(request.text);
+    }
   }
 });
 
