@@ -12,7 +12,7 @@ function getHistory(callback) {
   });
 }
 
-async function sendMessage(message) {
+async function sendMessage(message, fromContext = false) {
   // Display the user's message in the chat interface
   const chatHistory = document.getElementById('chat-history');
   chatHistory.innerHTML += `<p><strong>User:</strong> ${message}</p>`;
@@ -52,30 +52,43 @@ async function sendMessage(message) {
 
   // Enable the send button
   sendButton.disabled = false;
+
+  if (!fromContext) {
+    const userInput = document.getElementById('user-input');
+    userInput.focus();
+  } else {
+    window.postMessage({ action: "responseReceived" }, "*");
+  }
 }
 
-function startChat() {
-  const userInput = document.getElementById('user-input');
-  const sendButton = document.getElementById('send-button');
-  let isSending = false;
+// Expose the sendMessage function to the window object
+window.sendMessage = sendMessage;
 
-  sendButton.addEventListener('click', async () => {
-    if (!isSending) {
-      isSending = true;
-      const message = userInput.value;
-      userInput.value = '';
-      await sendMessage(message);
-      isSending = false;
-    }
-  });
+window.addEventListener("message", (event) => {
+  if (event.data.action === "sendMessage") {
+    sendMessage(event.data.message, event.data.fromContext);
+  }
+});
 
-  userInput.addEventListener('keypress', async (event) => {
-    if (event.key === 'Enter' && !isSending) {
-      isSending = true;
-      const message = userInput.value;
-      userInput.value = '';
-      await sendMessage(message);
-      isSending = false;
-    }
-  });
-}
+const userInput = document.getElementById('user-input');
+const sendButton = document.getElementById('send-button');
+let isSending = false;
+
+sendButton.addEventListener('click', async () => {
+  if (!isSending) {
+    isSending = true;
+    const message = userInput.value;
+    userInput.value = '';
+    await sendMessage(message);
+    isSending = false;
+  }
+});
+userInput.addEventListener('keypress', async (event) => {
+  if (event.key === 'Enter' && !isSending) {
+    isSending = true;
+    const message = userInput.value;
+    userInput.value = '';
+    await sendMessage(message);
+    isSending = false;
+  }
+});
