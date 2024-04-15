@@ -66,6 +66,8 @@ function createChatbotContainer() {
   document.getElementById('close-button').addEventListener('click', function() {
     toggleChatbotVisibility();
   });
+
+  chatbotContainer.style.display = 'none';
 } 
 
 function toggleChatbotVisibility() {
