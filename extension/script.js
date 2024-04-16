@@ -12,14 +12,38 @@ function getHistory(callback) {
   });
 }
 
+function createLoadingMessage() {
+  const chatbotContainer = document.getElementById('chatbot-container');
+  if (chatbotContainer) {
+    const loadingMessage = document.createElement('p');
+    loadingMessage.innerHTML = '<strong>Copilot:</strong> ';
+
+    const loadingImageUrl = chatbotContainer.dataset.loadingImageUrl;
+
+    const loadingImage = document.createElement('img');
+    loadingImage.src = loadingImageUrl;
+    loadingImage.alt = 'Loading...';
+    loadingImage.classList.add('w-7', 'h-5', 'inline');
+
+    loadingMessage.appendChild(loadingImage);
+    return loadingMessage;
+  } else {
+    // If chatbotContainer is not available yet, retry after a short delay
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(createLoadingMessage());
+      }, 100);
+    });
+  }
+}
+
 async function sendMessage(message, fromContext = false) {
   // Display the user's message in the chat interface
   const chatHistory = document.getElementById('chat-history');
   chatHistory.innerHTML += `<p><strong>User:</strong> ${message}</p>`;
 
   // Loading message
-  const loadingMessage = document.createElement('p');
-  loadingMessage.innerHTML = '<strong>Copilot:</strong> <img src="loading.gif" alt="Loading..." class="w-8 h-8 inline" />';
+  const loadingMessage = await createLoadingMessage();
   chatHistory.appendChild(loadingMessage);
 
   // Disable the send button

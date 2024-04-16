@@ -3,6 +3,7 @@ let isInjected = false;
 let isChatbotVisible = false;
 
 function createChatbotContainer() {
+  const loadingGifURL = chrome.runtime.getURL("loading.gif");
   chatbotContainer = document.createElement('div');
   chatbotContainer.id = 'chatbot-container';
   chatbotContainer.classList.add('fixed', 'bottom-4', 'right-4');
@@ -28,6 +29,8 @@ function createChatbotContainer() {
       <p class="text-blue-500 dark:text-blue-300 text-xs pt-1 ml-1">Powered by Gemini</p>
     </div>
   `;
+
+  chatbotContainer.dataset.loadingImageUrl = loadingGifURL;
 
   // z-index
   chatbotContainer.style.zIndex = '9999';
