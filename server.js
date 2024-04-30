@@ -3,18 +3,31 @@ const { VertexAI } = require('@google-cloud/vertexai');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Initialize Vertex with your Cloud project and location
 const vertex_ai = new VertexAI({ project: 'ai-hackathon-419617', location: 'europe-west2' });
 const model = 'gemini-1.5-pro-preview-0409';
 
+const systemInstruction = {
+  parts: [
+    {
+      text: 'Your name is Gemini, You are to generate succinct explanations in text-only format within a 100-word limit, embodying the role of an explanation bot dedicated to clarifying diverse subjects efficiently and comprehensively.',
+    },
+  ],
+};
+
 // Instantiate the models
 const generativeModel = vertex_ai.preview.getGenerativeModel({
   model: model,
+  systemInstruction: systemInstruction,
   generationConfig: {
-    'maxOutputTokens': 1000,
+    'maxOutputTokens': 500,
     'temperature': 1,
     'topP': 0.95,
   },
@@ -27,15 +40,41 @@ const generativeModel = vertex_ai.preview.getGenerativeModel({
 });
 
 // API endpoint for sending messages
-app.post('/api/send-message', async (req, res) => {
-  const { message, history } = req.body;
+app.options('/api/send-message', cors());
+app.post('/api/send-message', cors(), async (req, res) => {
+  const { message, history, systemInstruction} = req.body;
+  console.log('Received request JSON:', req.body);
+  
+  let chat;
+  if (history.length === 0) {
+    // If there is no conversation history, start a new chat
+    chat = generativeModel.startChat({systemInstruction: systemInstruction});
+  } else {
+    // If there is conversation history, continue the existing chat
+    chat = generativeModel.startChat({ history, systemInstruction: systemInstruction});
+  }
+  
+  // Send the user's message and wait for the response
+  const result = await chat.sendMessage(message);
+  const response = await result.response;
+  const modelResponse = response.candidates[0].content.parts[0].text;
 
-  const streamResult = await generativeModel.startChat({ history }).sendMessageStream([{ text: message }]);
-  const response = await streamResult.response;
-  const modelResponse = response.candidates[0].content;
+  // Add the user's message and the model's response to the conversation history
+  const updatedHistory = [
+    ...history,
+    {
+      role: 'user',
+      parts: [{ text: message }],
+    },
+    {
+      role: 'model',
+      parts: [{ text: modelResponse }],
+    },
+  ];
+
 
   // Send the response to the client
-  res.json({ response: modelResponse.parts[0].text });
+  res.json({ response: modelResponse, history: updatedHistory });
 });
 
 // Start server

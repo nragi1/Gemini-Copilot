@@ -1,9 +1,9 @@
 let chatbotContainer = null;
 let isInjected = false;
-let chatbotState = false;
+let isChatbotVisible = false;
 
 function createChatbotContainer() {
-  if (chatbotState) return;
+  const loadingGifURL = chrome.runtime.getURL("loading.gif");
   chatbotContainer = document.createElement('div');
   chatbotContainer.id = 'chatbot-container';
   chatbotContainer.classList.add('fixed', 'bottom-4', 'right-4');
@@ -29,6 +29,8 @@ function createChatbotContainer() {
       <p class="text-blue-500 dark:text-blue-300 text-xs pt-1 ml-1">Powered by Gemini</p>
     </div>
   `;
+
+  chatbotContainer.dataset.loadingImageUrl = loadingGifURL;
 
   // z-index
   chatbotContainer.style.zIndex = '9999';
@@ -58,8 +60,6 @@ function createChatbotContainer() {
   styleElement.href = chrome.runtime.getURL('styles.css');
   document.head.appendChild(styleElement);
 
-  chatbotState = true;
-
   // Initialise drag and drop
   chatbotHeader.addEventListener('mousedown', handleMouseDown);
   document.addEventListener('mousemove', handleMouseMove);
@@ -67,22 +67,21 @@ function createChatbotContainer() {
 
   // Close through close button
   document.getElementById('close-button').addEventListener('click', function() {
-    removeChatbotContainer();
+    toggleChatbotVisibility();
   });
 
-  startChat();
+  chatbotContainer.style.display = 'none';
 } 
 
-// Remove the chatbot container
-function removeChatbotContainer() {
+function toggleChatbotVisibility() {
   if (chatbotContainer) {
-    const chatbotHeader = document.getElementById('chatbot-header');
-    chatbotHeader.removeEventListener('mousedown', handleMouseDown);
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-    chatbotContainer.remove();
-    chatbotContainer = null;
-    chatbotState = false;
+    if (isChatbotVisible) {
+      chatbotContainer.style.display = 'none';
+      isChatbotVisible = false;
+    } else {
+      chatbotContainer.style.display = 'block';
+      isChatbotVisible = true;
+    }
   }
 }
 
@@ -128,13 +127,73 @@ function handleMouseUp() {
   isDragging = false;
 }
 
-// Toggle the chatbot container
+createChatbotContainer();
+
+let LoadingExplain = false;
+
+// Context menu
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'toggleChatbot') {
-    if (chatbotContainer) {
-      removeChatbotContainer();
-    } else {
-      createChatbotContainer();
+    toggleChatbotVisibility();
+  } else if (request.action === 'explainText') {
+    if (!LoadingExplain) {
+      explainText(request.text);
     }
   }
 });
+
+function explainText(selectedText) {
+  // Show the chatbot container
+  if (!isChatbotVisible) {
+    chatbotContainer.style.display = 'block';
+    isChatbotVisible = true;
+  }
+
+  // Get position of highlighted text
+  const selection = window.getSelection();
+  const range = selection.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+
+  // Position the chatbot above the highlighted text
+  const chatbotTop = rect.top + window.scrollY - chatbotContainer.offsetHeight - 10;
+  const chatbotLeft = rect.left + window.scrollX;    
+  if (chatbotTop < window.scrollY) {
+    chatbotContainer.style.top = window.scrollY + rect.bottom + 10 + 'px';
+  } else {
+    chatbotContainer.style.top = chatbotTop + 'px';
+  }
+  chatbotContainer.style.left = chatbotLeft + 'px';
+
+  // Wait for the chatbot to load
+  const chatbotBody = document.getElementById('chatbot-body');
+  if (chatbotBody) {
+    sendMessageLoaded(selectedText);
+  } else {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          const chatbotBody = document.getElementById('chatbot-body');
+          if (chatbotBody) {
+            observer.disconnect();
+            sendMessageLoaded(selectedText);
+          }
+        }
+      });
+    });
+    observer.observe(chatbotContainer, { childList: true });
+  }
+
+  LoadingExplain = true;
+
+  // Wait for response
+  window.addEventListener("message", function onResponseReceived(event) {
+    if (event.data.action === "responseReceived") {
+      LoadingExplain = false;
+      window.removeEventListener("message", onResponseReceived);
+    }
+  });
+}
+
+function sendMessageLoaded(message) {
+  window.postMessage({ action: "sendMessage", message: message, fromContext: true }, "*");
+}
