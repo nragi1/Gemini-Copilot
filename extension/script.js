@@ -2,7 +2,7 @@ let convHistory = [];
 
 function storeHistory(history) {
   sessionStorage.setItem('convHistory', JSON.stringify(history));
-  console.log('History is set to ' + history);
+  console.log('History is set to ' + JSON.stringify(history));
 }
 
 function getHistory(callback) {
@@ -59,9 +59,7 @@ async function sendMessage(message, fromContext = false) {
 
   const data = await response.json();
   const modelResponse = data.response;
-
-  // Add response to conversation history
-  convHistory.push({ author: 'Copilot', content: modelResponse });
+  convHistory = data.history;
 
   // Store history
   storeHistory(convHistory);
@@ -70,7 +68,11 @@ async function sendMessage(message, fromContext = false) {
   chatHistory.removeChild(loadingMessage);
 
   // Display the conversation history in the chat interface
-  chatHistory.innerHTML = convHistory.map(entry => `<p><strong>${entry.author}:</strong> ${entry.content}</p>`).join('');
+  chatHistory.innerHTML = convHistory.map(entry => {
+    const role = entry.role;
+    const text = entry.parts[0].text;
+    return `<p><strong>${role === 'user' ? 'User' : 'Copilot'}:</strong> ${text}</p>`;
+  }).join('');
 
   // Enable the send button
   sendButton.disabled = false;

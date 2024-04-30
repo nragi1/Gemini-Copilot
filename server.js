@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
@@ -35,12 +35,37 @@ app.options('/api/send-message', cors());
 app.post('/api/send-message', cors(), async (req, res) => {
   const { message, history } = req.body;
   console.log('Received history:', history);
-  const streamResult = await generativeModel.startChat({ history }).sendMessageStream([{ text: message }]);
-  const response = await streamResult.response;
-  const modelResponse = response.candidates[0].content;
+  
+  let chat;
+  if (history.length === 0) {
+    // If there is no conversation history, start a new chat
+    chat = generativeModel.startChat();
+  } else {
+    // If there is conversation history, continue the existing chat
+    chat = generativeModel.startChat({ history });
+  }
+
+  // Send the user's message and wait for the response
+  const result = await chat.sendMessage(message);
+  const response = await result.response;
+  const modelResponse = response.candidates[0].content.parts[0].text;
+
+  // Add the user's message and the model's response to the conversation history
+  const updatedHistory = [
+    ...history,
+    {
+      role: 'user',
+      parts: [{ text: message }],
+    },
+    {
+      role: 'model',
+      parts: [{ text: modelResponse }],
+    },
+  ];
+
 
   // Send the response to the client
-  res.json({ response: modelResponse.parts[0].text });
+  res.json({ response: modelResponse, history: updatedHistory });
 });
 
 // Start server
