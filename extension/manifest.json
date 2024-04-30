@@ -8,7 +8,8 @@
     "activeTab",
     "tabs",
     "scripting",
-    "contextMenus"
+    "contextMenus",
+    "commands"
   ],
   "background": {
     "service_worker": "background.js"
@@ -28,5 +29,14 @@
       "resources": ["loading.gif","script.js", "styles.css"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "commands": {
+    "explain-text": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
+      },
+      "description": "Explain the selected text"
+    }
+  }
 }
