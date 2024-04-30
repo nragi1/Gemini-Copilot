@@ -17,8 +17,9 @@ const model = 'gemini-1.5-pro-preview-0409';
 // Instantiate the models
 const generativeModel = vertex_ai.preview.getGenerativeModel({
   model: model,
+  
   generationConfig: {
-    'maxOutputTokens': 1000,
+    'maxOutputTokens': 500,
     'temperature': 1,
     'topP': 0.95,
   },
@@ -33,8 +34,8 @@ const generativeModel = vertex_ai.preview.getGenerativeModel({
 // API endpoint for sending messages
 app.options('/api/send-message', cors());
 app.post('/api/send-message', cors(), async (req, res) => {
-  const { message, history } = req.body;
-  console.log('Received history:', history);
+  const { message, history} = req.body;
+  console.log('Received request JSON:', req.body);
   
   let chat;
   if (history.length === 0) {
@@ -42,9 +43,9 @@ app.post('/api/send-message', cors(), async (req, res) => {
     chat = generativeModel.startChat();
   } else {
     // If there is conversation history, continue the existing chat
-    chat = generativeModel.startChat({ history });
+    chat = generativeModel.startChat({ history, });
   }
-
+  
   // Send the user's message and wait for the response
   const result = await chat.sendMessage(message);
   const response = await result.response;
