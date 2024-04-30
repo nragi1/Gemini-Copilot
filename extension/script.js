@@ -1,15 +1,13 @@
 let convHistory = [];
 
 function storeHistory(history) {
-  chrome.storage.session.set({ convHistory: history }, function() {
-    console.log('History is set to ' + history);
-  });
+  sessionStorage.setItem('convHistory', JSON.stringify(history));
+  console.log('History is set to ' + history);
 }
 
 function getHistory(callback) {
-  chrome.storage.session.get('convHistory', function(data) {
-    callback(data.convHistory || []);
-  });
+  const storedHistory = sessionStorage.getItem('convHistory');
+  callback(storedHistory ? JSON.parse(storedHistory) : []);
 }
 
 function createLoadingMessage() {

@@ -3,7 +3,11 @@ const { VertexAI } = require('@google-cloud/vertexai');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Initialize Vertex with your Cloud project and location
@@ -27,9 +31,10 @@ const generativeModel = vertex_ai.preview.getGenerativeModel({
 });
 
 // API endpoint for sending messages
-app.post('/api/send-message', async (req, res) => {
+app.options('/api/send-message', cors());
+app.post('/api/send-message', cors(), async (req, res) => {
   const { message, history } = req.body;
-
+  console.log('Received history:', history);
   const streamResult = await generativeModel.startChat({ history }).sendMessageStream([{ text: message }]);
   const response = await streamResult.response;
   const modelResponse = response.candidates[0].content;
