@@ -38,7 +38,7 @@ function createLoadingMessage() {
 async function sendMessage(message, fromContext = false) {
   // Display the user's message in the chat interface
   const chatHistory = document.getElementById('chat-history');
-  chatHistory.innerHTML += `<p><strong>User:</strong> ${message}</p>`;
+  chatHistory.innerHTML = `<p><strong>User:</strong> ${message}</p>`;
 
   // Loading message
   const loadingMessage = await createLoadingMessage();
@@ -68,11 +68,14 @@ async function sendMessage(message, fromContext = false) {
   chatHistory.removeChild(loadingMessage);
 
   // Display the conversation history in the chat interface
-  chatHistory.innerHTML = convHistory.map(entry => {
-    const role = entry.role;
-    const text = entry.parts[0].text;
-    return `<p><strong>${role === 'user' ? 'User' : 'Copilot'}:</strong> ${text}</p>`;
-  }).join('');
+  // chatHistory.innerHTML = convHistory.map(entry => {
+    // const role = entry.role;
+    // const text = entry.parts[0].text;
+    // return `<p><strong>${role === 'user' ? 'User' : 'Copilot'}:</strong> ${text}</p>`;
+  // }).join('');
+
+  // Display the model's response in the chat interface
+  chatHistory.innerHTML = `<p><strong>User:</strong> ${message}</p><p><strong>Copilot:</strong> ${modelResponse}</p>`;
 
   // Enable the send button
   sendButton.disabled = false;
