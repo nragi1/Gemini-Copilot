@@ -2,5 +2,6 @@
 
 ## Prequisite:
 
-## How to use:
 
+## How to use:
+$env:GOOGLE_APPLICATION_CREDENTIALS="GOOGLE_APPLICATION_CREDENTIALS.json"
