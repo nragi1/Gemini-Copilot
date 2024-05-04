@@ -6,6 +6,7 @@ GCP Account
 ## How to set up:
 - Create a Service Account with access to Vertex AI
 - Create a Key in the Service Account and Select JSON
+- In server.js, change the project and location with your project ID and location
 - Set the JSON Key to the environmental variable in your editor
 ```
 $env:GOOGLE_APPLICATION_CREDENTIALS="yourpath/GOOGLE_APPLICATION_CREDENTIALS.json"
